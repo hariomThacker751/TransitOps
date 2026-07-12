@@ -25,7 +25,7 @@ export default function Landing() {
     let reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     // --- THREE.JS SCENE SETUP ---
-    let scene, camera, renderer, truckGroup, sceneGroup
+    let scene, camera, renderer, sceneGroup
     let cards = [], particles
     let mouseX = 0, mouseY = 0
     let targetRotX = 0, targetRotY = 0
@@ -67,50 +67,6 @@ export default function Landing() {
       return tex
     }
 
-    function buildTruck() {
-      const g = new THREE.Group()
-      const bodyMat = new THREE.MeshStandardMaterial({color: 0x4f46e5, emissive: 0x6366f1, emissiveIntensity: 0.4, metalness: 0.3, roughness: 0.4})
-      const cabinMat = new THREE.MeshStandardMaterial({color: 0x4338ca, emissive: 0x6366f1, emissiveIntensity: 0.3, metalness: 0.3, roughness: 0.4})
-      const wheelMat = new THREE.MeshStandardMaterial({color: 0x1e293b, metalness: 0.5, roughness: 0.6})
-      const glassMat = new THREE.MeshStandardMaterial({color: 0x818cf8, emissive: 0x6366f1, emissiveIntensity: 0.5, transparent: true, opacity: 0.6})
-
-      // Cargo box
-      const cargo = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2, 2), bodyMat)
-      cargo.position.set(-0.4, 0.5, 0)
-      g.add(cargo)
-      
-      // Cabin
-      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.5, 1.9), cabinMat)
-      cabin.position.set(1.9, 0.2, 0)
-      g.add(cabin)
-      
-      // Windshield
-      const glass = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1, 1.7), glassMat)
-      glass.position.set(2.55, 0.4, 0)
-      g.add(glass)
-      
-      // Wheels
-      const wheelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.4, 20)
-      const positions = [[-1.2, -0.8, 1.1], [-1.2, -0.8, -1.1], [1.4, -0.8, 1.1], [1.4, -0.8, -1.1]]
-      positions.forEach(pos => {
-        const w = new THREE.Mesh(wheelGeo, wheelMat)
-        w.rotation.x = Math.PI / 2
-        w.position.set(pos[0], pos[1], pos[2])
-        g.add(w)
-      })
-      
-      // Headlight glow
-      const lightMat = new THREE.MeshBasicMaterial({color: 0xa5b4fc})
-      const lh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), lightMat)
-      lh.position.set(2.6, 0.2, 0.7)
-      g.add(lh)
-      const lh2 = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), lightMat)
-      lh2.position.set(2.6, 0.2, -0.7)
-      g.add(lh2)
-
-      return g
-    }
-
     function initThree() {
       scene = new THREE.Scene()
       camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100)
@@ -136,11 +92,6 @@ export default function Landing() {
 
       sceneGroup = new THREE.Group()
       scene.add(sceneGroup)
-
-      // Truck
-      truckGroup = buildTruck()
-      truckGroup.scale.set(0.85, 0.85, 0.85)
-      sceneGroup.add(truckGroup)
 
       // Orbiting KPI cards
       const cardData = [
@@ -192,8 +143,6 @@ export default function Landing() {
       if (!reduceMotion) {
         // Float bob
         sceneGroup.position.y = Math.sin(clock * 0.8) * 0.4
-        // Slow Y rotation
-        truckGroup.rotation.y += 0.005
         // Orbit cards
         cards.forEach(card => {
           card.userData.angle += card.userData.speed
