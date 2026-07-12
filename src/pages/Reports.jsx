@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { BarChart3, Download, TrendingUp, TrendingDown, Fuel, IndianRupee, Gauge } from 'lucide-react'
+import { BarChart3, Download, TrendingUp, TrendingDown, Fuel, IndianRupee, Gauge, Sparkles } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
@@ -9,6 +9,7 @@ import Tabs from '@/components/ui/Tabs'
 import ChartCard from '@/components/ui/ChartCard'
 import DataTable from '@/components/ui/DataTable'
 import KpiCard from '@/components/ui/KpiCard'
+import AnomalyExplainerModal from '@/components/domain/AnomalyExplainerModal'
 import { useResource } from '@/hooks/useResource'
 import api from '@/api'
 import { useAuth } from '@/context/AuthContext'
@@ -23,13 +24,20 @@ const TABS = [
   { value: 'fuel', label: 'Fuel Efficiency', icon: Fuel },
 ]
 
+// Maps each report tab to the anomaly-explainer metric.
+const TAB_METRIC = { roi: 'roi', costs: 'operational_cost', fuel: 'fuel_efficiency' }
+
 export default function Reports() {
   const { can } = useAuth()
   const [tab, setTab] = useState('roi')
+  const [anomaly, setAnomaly] = useState(null) // { vehicleReg, metric }
 
   const { data: roi, loading: roiLoading } = useResource(() => api.reports.roi(), [tab])
   const { data: costs, loading: costsLoading } = useResource(() => api.reports.vehicleCosts(), [tab])
   const { data: fuel, loading: fuelLoading } = useResource(() => api.reports.fuelEfficiency(), [tab])
+
+  const openAnomaly = (vehicleReg) => setAnomaly({ vehicleReg, metric: TAB_METRIC[tab] || 'roi' })
+  const closeAnomaly = () => setAnomaly(null)
 
   const handleExport = async () => {
     const stamp = new Date().toISOString().slice(0, 10)
@@ -101,15 +109,24 @@ export default function Reports() {
 
       <Tabs tabs={TABS} value={tab} onChange={setTab} />
 
-      {tab === 'roi' && <ROITab data={roi} loading={roiLoading} />}
-      {tab === 'costs' && <CostsTab data={costs} loading={costsLoading} />}
-      {tab === 'fuel' && <FuelTab data={fuel} loading={fuelLoading} />}
+      {tab === 'roi' && <ROITab data={roi} loading={roiLoading} onExplain={openAnomaly} />}
+      {tab === 'costs' && <CostsTab data={costs} loading={costsLoading} onExplain={openAnomaly} />}
+      {tab === 'fuel' && <FuelTab data={fuel} loading={fuelLoading} onExplain={openAnomaly} />}
+
+      {anomaly && (
+        <AnomalyExplainerModal
+          open={!!anomaly}
+          onClose={closeAnomaly}
+          vehicleReg={anomaly.vehicleReg}
+          metric={anomaly.metric}
+        />
+      )}
     </div>
   )
 }
 
 // ── ROI Tab ──────────────────────────────────────────────────────────────────
-function ROITab({ data, loading }) {
+function ROITab({ data, loading, onExplain }) {
   const summary = useMemo(() => {
     if (!data) return { totalRevenue: 0, totalCost: 0, avgRoi: 0, profitable: 0 }
     const totalRevenue = data.reduce((s, r) => s + r.revenue, 0)
@@ -140,6 +157,14 @@ function ROITab({ data, loading }) {
         </span>
       ),
     },
+    {
+      key: 'explain', header: '', sortable: false, align: 'right',
+      render: (r) => (
+        <Button variant="ghost" size="sm" leftIcon={Sparkles} onClick={() => onExplain?.(r.registration_number)}>
+          Explain
+        </Button>
+      ),
+    },
   ]
 
   return (
@@ -157,7 +182,7 @@ function ROITab({ data, loading }) {
 }
 
 // ── Cost Breakdown Tab ───────────────────────────────────────────────────────
-function CostsTab({ data, loading }) {
+function CostsTab({ data, loading, onExplain }) {
   const chartData = useMemo(() => {
     if (!data) return []
     return data
@@ -190,6 +215,14 @@ function CostsTab({ data, loading }) {
     { key: 'maintenance', header: 'Maintenance', sortable: true, align: 'right', render: (r) => <span className="text-xs text-amber-600">{formatCurrency(r.maintenance, { compact: true })}</span> },
     { key: 'expenses', header: 'Expenses', sortable: true, align: 'right', render: (r) => <span className="text-xs text-ink-500">{formatCurrency(r.expenses, { compact: true })}</span> },
     { key: 'total', header: 'Total', sortable: true, align: 'right', render: (r) => <span className="text-xs font-bold text-ink-900">{formatCurrency(r.total, { compact: true })}</span> },
+    {
+      key: 'explain', header: '', sortable: false, align: 'right',
+      render: (r) => (
+        <Button variant="ghost" size="sm" leftIcon={Sparkles} onClick={() => onExplain?.(r.registration_number)}>
+          Explain
+        </Button>
+      ),
+    },
   ]
 
   return (
@@ -220,7 +253,7 @@ function CostsTab({ data, loading }) {
 }
 
 // ── Fuel Efficiency Tab ──────────────────────────────────────────────────────
-function FuelTab({ data, loading }) {
+function FuelTab({ data, loading, onExplain }) {
   const columns = [
     {
       key: 'registration_number', header: 'Vehicle', sortable: true,
@@ -240,6 +273,14 @@ function FuelTab({ data, loading }) {
         <span className={cn('text-xs font-bold', r.efficiency > 0 ? 'text-emerald-600' : 'text-ink-400')}>
           {r.efficiency > 0 ? `${r.efficiency} km/L` : '—'}
         </span>
+      ),
+    },
+    {
+      key: 'explain', header: '', sortable: false, align: 'right',
+      render: (r) => (
+        <Button variant="ghost" size="sm" leftIcon={Sparkles} onClick={() => onExplain?.(r.registration_number)}>
+          Explain
+        </Button>
       ),
     },
   ]

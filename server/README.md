@@ -192,6 +192,90 @@ GET /api/reports/export/csv?report= # CSV export [fleet_manager, safety_officer,
 
 **CSV export report options:** `vehicle-costs` | `roi` | `fuel-efficiency` | `vehicles` | `drivers` | `trips`
 
+### LLM — Ops Copilot & Anomaly Explainer
+
+Read-only, JWT-authenticated assistive endpoints powered by Sarvam AI. These
+**never** mutate the database or override business rules — they summarize and
+explain live data only.
+
+```
+POST /api/llm/ops-query         # Role-aware Q&A over current fleet state [All roles]
+POST /api/llm/explain-anomaly   # Explain why a vehicle metric looks off  [All roles]
+```
+
+**`POST /api/llm/ops-query`** — body: `{ question, role? }`
+
+The `role` defaults to the caller's session role. Drivers are always scoped to
+their own data. The backend gathers a role-appropriate context snapshot
+(fleet stats, safety flags, financials, or the driver's trips) and passes it
+to the LLM as grounded context.
+
+```json
+{
+  "question": "Which vehicles have the highest operational cost and should be considered for retirement?",
+  "role": "fleet_manager"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "answer": "TRK-01 has the highest operational cost at ₹22,100...",
+    "role": "fleet_manager",
+    "model": "sarvam-30b",
+    "usage": { "total_tokens": 540 }
+  }
+}
+```
+
+**`POST /api/llm/explain-anomaly`** — body: `{ vehicle_reg, metric, window: { from, to }, question? }`
+
+`metric` is one of `roi` | `operational_cost` | `fuel_efficiency`. The backend
+computes a numeric summary from real DB data for the window and asks the LLM
+to explain the pattern.
+
+```json
+{
+  "vehicle_reg": "TRK-01",
+  "metric": "roi",
+  "window": { "from": "2026-01-01", "to": "2026-06-30" }
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "answer": "TRK-01's ROI is low because fuel costs (₹22,100) consumed...",
+    "vehicle_reg": "TRK-01",
+    "metric": "roi",
+    "window": { "from": "2026-01-01", "to": "2026-06-30" },
+    "summary": { "total_revenue": 161000, "total_operational_cost": 25600, "roi": 0.0384, ... }
+  }
+}
+```
+
+#### LLM configuration
+
+```env
+LLM_PROVIDER=sarvam          # "sarvam" (default) or "generic" (OpenAI-compatible)
+LLM_API_KEY=                 # your Sarvam API subscription key (sk_...)
+LLM_MODEL=sarvam-30b         # sarvam-30b (default) or sarvam-105b
+LLM_BASE_URL=https://api.sarvam.ai
+LLM_TIMEOUT_MS=30000
+```
+
+Get a key from the [Sarvam dashboard](https://dashboard.sarvam.ai). Without
+`LLM_API_KEY`, the endpoints return a clear "not configured" error (502) so the
+frontend can surface it gracefully.
+
+> **Safety:** LLM endpoints are strictly read-only. They cannot create trips,
+> change statuses, override dispatch rules, or execute SQL. System prompts
+> forbid inventing data. The deterministic rules engine remains authoritative.
+
 ---
 
 ## 📦 Sample Requests & Responses
@@ -444,7 +528,10 @@ server/
 │   ├── services/                 # Business logic layer
 │   │   ├── tripRulesEngine.js    # Dispatch validation (12 rules)
 │   │   ├── maintenanceService.js # Maintenance transactions
-│   │   └── reportService.js      # Analytics queries
+│   │   ├── reportService.js      # Analytics queries
+│   │   ├── llmPrompts.js         # Role-specific LLM system prompts
+│   │   ├── llmContextBuilder.js  # Read-only LLM context snapshots
+│   │   └── llmClient.js          # Sarvam / generic chat-completion client
 │   ├── validators/               # express-validator chains
 │   ├── utils/                    # ApiError, ApiResponse, asyncHandler
 │   ├── seeds/                    # Import scripts + CSV data

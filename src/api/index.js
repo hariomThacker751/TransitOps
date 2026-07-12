@@ -14,6 +14,8 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false' // default true
 
 import * as mock from './mock/index.js'
 import * as real from './real/index.js'
+import { realLlm } from './real/llm.js'
+import { mockLlm } from './mock/llm.js'
 
 // ── Real-mode normalizers ───────────────────────────────────────────────────
 // The backend returns snake_case analytics fields; the UI pages use specific
@@ -92,6 +94,7 @@ const facade = {
   maintenance: m.mockMaintenance || m.realMaintenance,
   fuelLogs: m.mockFuelLogs || m.realFuelLogs,
   expenses: m.mockExpenses || m.realExpenses,
+  llm: USE_MOCK ? mockLlm : realLlm,
   isMock: USE_MOCK,
   resetSeed: () => (USE_MOCK ? mock.mockDb.reset() : Promise.reject('reset only available in mock mode')),
 }

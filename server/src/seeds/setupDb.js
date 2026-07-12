@@ -32,7 +32,7 @@ const setupDb = async () => {
     console.log(`✅ Database '${dbName}' is ready`);
 
     // Verify
-    const [rows] = await conn.execute('SHOW DATABASES LIKE ?', [dbName]);
+    const [rows] = await conn.execute(`SHOW DATABASES LIKE '${dbName}'`);
     if (rows.length > 0) {
       console.log(`\n🎉 Database setup complete!`);
       console.log(`   Database: ${dbName}`);
