@@ -56,7 +56,7 @@ export const DEMO_USERS = [
 
 /** Sidebar navigation items with role-gating metadata. */
 export const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: 'LayoutDashboard', roles: null },
+  { to: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard', roles: null },
   { to: '/vehicles', label: 'Vehicles', icon: 'Truck', roles: ['fleet_manager'] },
   { to: '/drivers', label: 'Drivers', icon: 'IdCard', roles: ['fleet_manager', 'safety_officer'] },
   { to: '/trips', label: 'Trips', icon: 'Route', roles: ['fleet_manager', 'driver'] },
