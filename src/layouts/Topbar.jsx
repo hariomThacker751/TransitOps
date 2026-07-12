@@ -1,8 +1,10 @@
-import { Menu, LogOut, RefreshCw, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Menu, LogOut, RefreshCw, ChevronDown, Sparkles } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth, ROLES } from '@/context/AuthContext'
 import Badge from '@/components/ui/Badge'
 import DropdownMenu, { KebabTrigger } from '@/components/ui/DropdownMenu'
+import OpsCopilotPanel from '@/components/domain/OpsCopilotPanel'
 import api from '@/api'
 import toast from 'react-hot-toast'
 import { cn } from '@/utils/cn'
@@ -37,6 +39,14 @@ export default function Topbar({ onMenuClick, onResetSeed }) {
   const { user, logout, role } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [copilotOpen, setCopilotOpen] = useState(false)
+
+  // Allow other components (e.g. the Dashboard quick action) to open the copilot.
+  useEffect(() => {
+    const handler = () => setCopilotOpen(true)
+    window.addEventListener('transitops:open-copilot', handler)
+    return () => window.removeEventListener('transitops:open-copilot', handler)
+  }, [])
 
   const handleReset = async () => {
     try {
@@ -69,6 +79,15 @@ export default function Topbar({ onMenuClick, onResetSeed }) {
       </div>
 
       <div className="flex items-center gap-2.5">
+        <button
+          onClick={() => setCopilotOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
+          title="Ask the Ops Copilot"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Ops Copilot</span>
+        </button>
+
         {api.isMock && (
           <button
             onClick={handleReset}
@@ -100,6 +119,8 @@ export default function Topbar({ onMenuClick, onResetSeed }) {
           ]}
         />
       </div>
+
+      <OpsCopilotPanel open={copilotOpen} onClose={() => setCopilotOpen(false)} />
     </header>
   )
 }
