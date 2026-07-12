@@ -32,14 +32,16 @@ export function AuthProvider({ children }) {
     const u = res.data
     setUser(u)
     localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(u))
-    if (u.token) localStorage.setItem('transitops.token', u.token)
     return res
   }, [])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    // If not mock mode, tell server to clear cookie
+    if (!api.isMock) {
+      await api.auth.logout?.().catch(() => {})
+    }
     setUser(null)
     localStorage.removeItem(STORAGE_KEYS.auth)
-    localStorage.removeItem('transitops.token')
   }, [])
 
   /** Instant role switch for demo — only in mock mode. */
@@ -50,7 +52,6 @@ export function AuthProvider({ children }) {
     const u = { ...safe, token: `mock.${role}.${Date.now()}` }
     setUser(u)
     localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(u))
-    localStorage.setItem('transitops.token', u.token)
   }, [])
 
   const value = useMemo(

@@ -8,17 +8,12 @@ const User = require('../models/User');
  * Attaches decoded user payload to req.user.
  */
 const authMiddleware = asyncHandler(async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!token) {
     throw new ApiError(401, 'Access denied. No token provided.');
   }
 
-  const token = authHeader.split(' ')[1];
-
-  if (!token) {
-    throw new ApiError(401, 'Access denied. Invalid token format.');
-  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

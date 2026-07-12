@@ -7,14 +7,7 @@ import axios from 'axios'
  */
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
-const http = axios.create({ baseURL, timeout: 15000 })
-
-// Attach JWT to every request.
-http.interceptors.request.use((config) => {
-  const token = localStorage.getItem('transitops.token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+const http = axios.create({ baseURL, timeout: 15000, withCredentials: true })
 
 // Normalize errors into the plan's { success, message } shape.
 // Blob responses (CSV export) bypass this — they're handled separately.

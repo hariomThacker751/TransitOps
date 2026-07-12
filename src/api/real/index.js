@@ -23,14 +23,14 @@ const FULL_LIST = { limit: 10000 }
 export const realAuth = {
   async login(creds) {
     const res = await http.post('/auth/login', creds)
-    // Backend returns { token, user: {id,name,email,role} } inside data.
-    // Flatten to match what AuthContext expects (token + user fields on one object).
+    // Backend returns { user: {id,name,email,role} } inside data.
     if (res.success && res.data) {
-      return { ...res, data: { ...res.data.user, token: res.data.token } }
+      return { ...res, data: res.data.user }
     }
     return res
   },
   me: () => http.get('/auth/me'),
+  logout: () => http.post('/auth/logout'),
 }
 
 export const realVehicles = {

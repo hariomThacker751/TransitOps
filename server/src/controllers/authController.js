@@ -42,8 +42,15 @@ const login = asyncHandler(async (req, res) => {
     expiresIn: process.env.JWT_EXPIRES_IN || '8h',
   });
 
+  // Set JWT in HttpOnly cookie
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 8 * 60 * 60 * 1000, // 8 hours
+  });
+
   return ApiResponse.success(res, 200, {
-    token,
     user: {
       id: user.id,
       name: user.name,
@@ -69,4 +76,18 @@ const getMe = asyncHandler(async (req, res) => {
   return ApiResponse.success(res, 200, user);
 });
 
-module.exports = { login, getMe };
+/**
+ * POST /api/auth/logout
+ * Clears the HttpOnly JWT cookie
+ */
+const logout = asyncHandler(async (req, res) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  return ApiResponse.success(res, 200, null, 'Logged out successfully');
+});
+
+module.exports = { login, getMe, logout };

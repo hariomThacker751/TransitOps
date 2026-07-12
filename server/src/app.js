@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const { connectDB, sequelize } = require('./config/db');
 const routes = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
@@ -28,7 +29,8 @@ app.use(
   })
 );
 
-app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

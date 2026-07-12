@@ -24,7 +24,7 @@ export const DEMO_USERS = [
     id: 1,
     name: 'Fleet Admin',
     email: 'fleet@transitops.com',
-    password: 'Fleet@123',
+    password: '', // Hidden in code
     role: 'fleet_manager',
     driver_id: null,
   },
@@ -32,7 +32,7 @@ export const DEMO_USERS = [
     id: 2,
     name: 'Driver Ops',
     email: 'driver@transitops.com',
-    password: 'Driver@123',
+    password: '', // Hidden in code
     role: 'driver',
     driver_id: 'DRV-01',
   },
@@ -40,7 +40,7 @@ export const DEMO_USERS = [
     id: 3,
     name: 'Safety Team',
     email: 'safety@transitops.com',
-    password: 'Safety@123',
+    password: '', // Hidden in code
     role: 'safety_officer',
     driver_id: null,
   },
@@ -48,7 +48,7 @@ export const DEMO_USERS = [
     id: 4,
     name: 'Finance Team',
     email: 'finance@transitops.com',
-    password: 'Finance@123',
+    password: '', // Hidden in code
     role: 'financial_analyst',
     driver_id: null,
   },
