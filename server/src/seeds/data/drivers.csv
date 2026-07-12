@@ -1,0 +1,11 @@
+driver_id,name,license_number,license_category,license_expiry_date,contact_number,safety_score,status
+DRV-01,Alex Johnson,LIC-AJ-2019-001,HMV,2027-06-30,+91-9876543210,92,Available
+DRV-02,Marcus Brown,LIC-MB-2018-002,HMV,2026-12-31,+91-9876543211,45,Suspended
+DRV-03,Sarah Williams,LIC-SW-2015-003,LMV,2024-03-15,+91-9876543212,78,Available
+DRV-04,James Davis,LIC-JD-2020-004,HMV,2026-09-30,+91-9876543213,88,On Trip
+DRV-05,Emily Chen,LIC-EC-2021-005,LMV,2027-12-31,+91-9876543214,95,Available
+DRV-06,Robert Wilson,LIC-RW-2019-006,HMV,2026-11-30,+91-9876543215,72,Available
+DRV-07,Patricia Moore,LIC-PM-2022-007,LMV,2028-04-30,+91-9876543216,85,Off Duty
+DRV-08,Michael Taylor,LIC-MT-2020-008,HMV,2026-08-31,+91-9876543217,81,Available
+DRV-09,Linda Anderson,LIC-LA-2018-009,LMV,2027-03-31,+91-9876543218,68,Available
+DRV-10,David Thomas,LIC-DT-2021-010,HMV,2027-10-31,+91-9876543219,90,On Trip

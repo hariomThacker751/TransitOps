@@ -3,12 +3,15 @@ import { Input, Select, FormField } from '@/components/ui/FormField'
 import Button from '@/components/ui/Button'
 import { useResource } from '@/hooks/useResource'
 import api from '@/api'
-import { cn } from '@/utils/cn'
 
 /**
  * TripForm — create a Draft trip.
- * Vehicle/driver dropdowns only show dispatch-eligible options:
- * Available vehicles (not In Shop / Retired) and Available drivers (not Suspended).
+ *
+ * Vehicle/driver dropdowns show dispatch-eligible options:
+ *  - Real mode: calls /vehicles/eligible-for-dispatch and /drivers/eligible-for-dispatch
+ *    (the backend filters out In Shop, Retired, Suspended, and expired-license).
+ *  - Mock mode: the mock doesn't have eligible-for-dispatch endpoints, so we
+ *    fall back to list({status:'Available'}) which approximates the same filter.
  */
 export default function TripForm({ onSubmit, onCancel, loading }) {
   const [form, setForm] = useState({
@@ -17,8 +20,15 @@ export default function TripForm({ onSubmit, onCancel, loading }) {
   })
   const [errors, setErrors] = useState({})
 
-  const { data: vehicles } = useResource(() => api.vehicles.list({ status: 'Available' }))
-  const { data: drivers } = useResource(() => api.drivers.list({ status: 'Available' }))
+  const useEligible = !api.isMock
+  const { data: vehicles } = useResource(
+    () => (useEligible ? api.vehicles.eligibleForDispatch() : api.vehicles.list({ status: 'Available' })),
+    [],
+  )
+  const { data: drivers } = useResource(
+    () => (useEligible ? api.drivers.eligibleForDispatch() : api.drivers.list({ status: 'Available' })),
+    [],
+  )
 
   const set = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -55,7 +65,7 @@ export default function TripForm({ onSubmit, onCancel, loading }) {
         <Input label="Destination" required placeholder="Ahmedabad" error={errors.destination} value={form.destination} onChange={set('destination')} />
       </div>
 
-      <FormField label="Vehicle" required error={errors.vehicle_reg} hint="Only Available vehicles are listed">
+      <FormField label="Vehicle" required error={errors.vehicle_reg} hint="Only dispatch-eligible vehicles are listed">
         <Select value={form.vehicle_reg} onChange={set('vehicle_reg')}>
           <option value="">Select vehicle…</option>
           {(vehicles || []).map((v) => (
@@ -66,7 +76,7 @@ export default function TripForm({ onSubmit, onCancel, loading }) {
         </Select>
       </FormField>
 
-      <FormField label="Driver" required error={errors.driver_id} hint="Only Available drivers are listed">
+      <FormField label="Driver" required error={errors.driver_id} hint="Only dispatch-eligible drivers are listed">
         <Select value={form.driver_id} onChange={set('driver_id')}>
           <option value="">Select driver…</option>
           {(drivers || []).map((d) => (

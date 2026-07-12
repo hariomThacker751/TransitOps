@@ -3,6 +3,7 @@ import { CheckCircle2, XCircle, Rocket, ShieldCheck } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { useResource } from '@/hooks/useResource'
 import api from '@/api'
+import { validateDispatch } from '@/utils/dispatchRules'
 import { cn } from '@/utils/cn'
 
 /**
@@ -11,15 +12,44 @@ import { cn } from '@/utils/cn'
  * Shows all 13 eligibility checks as a pass/fail checklist, then lets the
  * user dispatch the trip. On success, trip→Dispatched + vehicle/driver→On Trip.
  * On failure, the violation message is shown prominently.
+ *
+ * In mock mode: calls api.trips.validateDispatch (mock DB).
+ * In real mode: fetches trip + vehicles + drivers + maintenance from the
+ * backend and runs the shared validateDispatch utility client-side for the
+ * checklist UI. The actual enforcement happens on the backend when Dispatch
+ * is clicked — the backend's error message is surfaced if it rejects.
  */
 export default function DispatchActionPanel({ trip, onDispatched, onClose }) {
   const [dispatching, setDispatching] = useState(false)
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // Live-evaluate the rules each time the panel mounts / trip changes.
-  const { data: result, loading, refetch } = useResource(
-    () => api.trips.validateDispatch(trip.trip_id),
-    [trip?.trip_id],
-  )
+  // In real mode, fetch the context data for client-side rule evaluation.
+  const { data: vehicles } = useResource(() => api.vehicles.list(), [])
+  const { data: drivers } = useResource(() => api.drivers.list(), [])
+  const { data: allTrips } = useResource(() => api.trips.list(), [])
+  const { data: maintenance } = useResource(() => api.maintenance.list(), [])
+
+  useEffect(() => {
+    if (api.isMock) {
+      // Mock mode: use the mock's built-in validate endpoint.
+      let active = true
+      setLoading(true)
+      api.trips.validateDispatch(trip.trip_id).then((res) => {
+        if (active) {
+          setResult(res?.success ? res.data : { ok: false, checks: [], violations: [{ rule: 'error', message: res?.message }] })
+          setLoading(false)
+        }
+      })
+      return () => { active = false }
+    }
+    // Real mode: build context from fetched data and run shared rules.
+    if (vehicles && drivers && allTrips && maintenance) {
+      const ctx = { vehicles, drivers, trips: allTrips, maintenance }
+      setResult(validateDispatch(trip, ctx))
+      setLoading(false)
+    }
+  }, [trip?.trip_id, vehicles, drivers, allTrips, maintenance])
 
   const checks = result?.checks || []
   const violations = result?.violations || []
@@ -30,7 +60,12 @@ export default function DispatchActionPanel({ trip, onDispatched, onClose }) {
     const res = await api.trips.dispatch(trip.trip_id)
     setDispatching(false)
     if (res.success === false) {
-      refetch()
+      // Backend rejected — surface its actual error message.
+      setResult((prev) => ({
+        ...prev,
+        ok: false,
+        violations: res.violations || [{ rule: 'backend', message: res.message }],
+      }))
       return { success: false, message: res.message }
     }
     onDispatched?.(res)
@@ -51,9 +86,9 @@ export default function DispatchActionPanel({ trip, onDispatched, onClose }) {
         )}
         <div>
           <p className={cn('text-sm font-bold', ok ? 'text-emerald-800' : 'text-red-800')}>
-            {ok ? 'All checks passed — ready to dispatch' : `${violations.length} check${violations.length > 1 ? 's' : ''} failed`}
+            {loading ? 'Evaluating rules…' : ok ? 'All checks passed — ready to dispatch' : `${violations.length} check${violations.length > 1 ? 's' : ''} failed`}
           </p>
-          {!ok && <p className="text-xs text-red-600">{violations[0]?.message}</p>}
+          {!loading && !ok && <p className="text-xs text-red-600">{violations[0]?.message}</p>}
         </div>
       </div>
 
@@ -61,7 +96,7 @@ export default function DispatchActionPanel({ trip, onDispatched, onClose }) {
       <div className="rounded-xl border border-ink-200">
         <div className="border-b border-ink-100 bg-ink-50/60 px-4 py-2.5">
           <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink-500">
-            <ShieldCheck className="h-3.5 w-3.5" /> Dispatch Eligibility ({checks.filter(c => c.passed).length}/{checks.length})
+            <ShieldCheck className="h-3.5 w-3.5" /> Dispatch Eligibility ({checks.filter((c) => c.passed).length}/{checks.length})
           </p>
         </div>
         <div className="divide-y divide-ink-100">

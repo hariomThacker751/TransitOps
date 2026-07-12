@@ -1,0 +1,11 @@
+maintenance_id,vehicle_reg,maintenance_type,cost,start_date,end_date,status
+MNT-001,TRK-04,Engine Overhaul,85000.00,2026-07-01,,Active
+MNT-002,VEH-03,Brake System Replacement,22000.00,2026-07-03,,Active
+MNT-003,VAN-01,Tire Replacement,8500.00,2026-06-10,2026-06-11,Closed
+MNT-004,TRK-01,Oil Change & Filter,3500.00,2026-06-01,2026-06-01,Closed
+MNT-005,VAN-02,AC Repair,12000.00,2026-05-20,2026-05-22,Closed
+MNT-006,TRK-02,Transmission Service,45000.00,2026-05-15,2026-05-18,Closed
+MNT-007,VEH-04,Suspension Repair,18000.00,2026-06-05,2026-06-07,Closed
+MNT-008,TRK-05,Electrical System,15000.00,2026-06-15,2026-06-16,Closed
+MNT-009,VAN-03,Windshield Replacement,9500.00,2026-05-28,2026-05-29,Closed
+MNT-010,TRK-03,Clutch Replacement,32000.00,2026-06-20,2026-06-22,Closed

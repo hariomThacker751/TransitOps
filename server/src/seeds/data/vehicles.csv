@@ -1,0 +1,16 @@
+registration_number,vehicle_name_model,type,max_load_capacity_kg,odometer_km,acquisition_cost,status,region
+VAN-01,Ford Transit 2022,Van,800.00,45230.00,850000.00,Available,North
+VAN-02,Mercedes Sprinter 2021,Van,900.00,62100.00,1200000.00,Available,South
+VAN-03,Toyota Hiace 2023,Van,750.00,18500.00,780000.00,On Trip,East
+VAN-04,Volkswagen Crafter 2020,Van,1000.00,89300.00,950000.00,Available,West
+VAN-05,Ford Transit 2023,Van,850.00,12000.00,870000.00,Available,North
+TRK-01,Tata Prima 2022,Truck,5000.00,125000.00,3500000.00,Available,South
+TRK-02,Ashok Leyland 2021,Truck,7000.00,210000.00,4200000.00,On Trip,North
+TRK-03,Mahindra Blazo 2023,Truck,4500.00,35000.00,3800000.00,Available,East
+TRK-04,Eicher Pro 2020,Truck,6000.00,175000.00,3200000.00,In Shop,West
+TRK-05,BharatBenz 2022,Truck,5500.00,98000.00,3600000.00,Available,South
+VEH-01,Hyundai H1 2023,Mini Van,500.00,8000.00,650000.00,Available,East
+VEH-02,Maruti Suzuki Eeco 2019,Mini Van,400.00,145000.00,380000.00,Retired,West
+VEH-03,Tata Ace 2022,Mini Truck,750.00,67000.00,420000.00,In Shop,North
+VEH-04,Mahindra Bolero 2021,SUV,600.00,52000.00,920000.00,Available,South
+VEH-05,Toyota Innova 2023,SUV,550.00,22000.00,1100000.00,Available,East

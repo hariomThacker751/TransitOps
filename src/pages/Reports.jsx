@@ -31,8 +31,32 @@ export default function Reports() {
   const { data: costs, loading: costsLoading } = useResource(() => api.reports.vehicleCosts(), [tab])
   const { data: fuel, loading: fuelLoading } = useResource(() => api.reports.fuelEfficiency(), [tab])
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const stamp = new Date().toISOString().slice(0, 10)
+    // Real mode: download CSV from the backend (it generates the file).
+    if (!api.isMock) {
+      const reportType = tab === 'roi' ? 'roi' : tab === 'costs' ? 'vehicle-costs' : 'fuel-efficiency'
+      try {
+        const response = await api.reports.exportCSV(reportType)
+        const disposition = response.headers?.['content-disposition'] || ''
+        const filenameMatch = disposition.match(/filename="?(.+?)"?$/)
+        const filename = filenameMatch ? filenameMatch[1] : `transitops-${reportType}-${stamp}.csv`
+        const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        toast.success('CSV exported.')
+      } catch (e) {
+        toast.error(e?.message || 'Export failed.')
+      }
+      return
+    }
+    // Mock mode: generate CSV client-side from the in-memory data.
     if (tab === 'roi' && roi) {
       exportCSV(`transitops-roi-${stamp}.csv`, roi, [
         { header: 'Vehicle', value: 'registration_number' },

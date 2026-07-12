@@ -13,13 +13,18 @@ export const STORAGE_KEYS = {
   db: 'transitops.db.v1',
 }
 
-/** Demo credentials — mirror the seeded users in the implementation plan. */
+/**
+ * Demo credentials — mirror the seeded users in the backend (seedUsers.js).
+ * Passwords match the backend's bcrypt-hashed seeds.
+ * In mock mode these are used directly; in real mode they're just hints
+ * for the quick-login buttons (the backend validates against the DB).
+ */
 export const DEMO_USERS = [
   {
     id: 1,
     name: 'Fleet Admin',
     email: 'fleet@transitops.com',
-    password: 'transitops',
+    password: 'Fleet@123',
     role: 'fleet_manager',
     driver_id: null,
   },
@@ -27,7 +32,7 @@ export const DEMO_USERS = [
     id: 2,
     name: 'Driver Ops',
     email: 'driver@transitops.com',
-    password: 'transitops',
+    password: 'Driver@123',
     role: 'driver',
     driver_id: 'DRV-01',
   },
@@ -35,7 +40,7 @@ export const DEMO_USERS = [
     id: 3,
     name: 'Safety Team',
     email: 'safety@transitops.com',
-    password: 'transitops',
+    password: 'Safety@123',
     role: 'safety_officer',
     driver_id: null,
   },
@@ -43,7 +48,7 @@ export const DEMO_USERS = [
     id: 4,
     name: 'Finance Team',
     email: 'finance@transitops.com',
-    password: 'transitops',
+    password: 'Finance@123',
     role: 'financial_analyst',
     driver_id: null,
   },
@@ -57,7 +62,7 @@ export const NAV_ITEMS = [
   { to: '/trips', label: 'Trips', icon: 'Route', roles: ['fleet_manager', 'driver'] },
   { to: '/maintenance', label: 'Maintenance', icon: 'Wrench', roles: ['fleet_manager', 'safety_officer'] },
   { to: '/fuel-logs', label: 'Fuel Logs', icon: 'Fuel', roles: ['fleet_manager', 'driver'] },
-  { to: '/expenses', label: 'Expenses', icon: 'ReceiptText', roles: ['fleet_manager', 'financial_analyst'] },
+  { to: '/expenses', label: 'Expenses', icon: 'ReceiptText', roles: ['fleet_manager', 'driver', 'financial_analyst'] },
   { to: '/reports', label: 'Reports', icon: 'BarChart3', roles: ['fleet_manager', 'financial_analyst', 'safety_officer'] },
 ]
 
@@ -79,7 +84,7 @@ export const PERMISSIONS = {
   },
   maintenance: { view: ['fleet_manager', 'safety_officer'], create: ['fleet_manager', 'safety_officer'], close: ['fleet_manager', 'safety_officer'] },
   fuelLogs: { view: ['fleet_manager', 'driver', 'financial_analyst'], create: ['fleet_manager', 'driver'] },
-  expenses: { view: ['fleet_manager', 'financial_analyst'], create: ['fleet_manager', 'financial_analyst'] },
+  expenses: { view: ['fleet_manager', 'driver', 'financial_analyst'], create: ['fleet_manager', 'driver', 'financial_analyst'] },
   reports: { view: ['fleet_manager', 'financial_analyst', 'safety_officer'], export: ['fleet_manager', 'financial_analyst', 'safety_officer'] },
   // Dashboard widgets — which KPI sections each role sees.
   dashboard: {

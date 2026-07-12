@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button'
 import { DRIVER_STATUS_OPTIONS, LICENSE_CATEGORIES } from '@/utils/statusConfig'
 
 const EMPTY = {
+  driver_id: '',
   name: '',
   license_number: '',
   license_category: 'LMV',
@@ -15,6 +16,8 @@ const EMPTY = {
 
 /**
  * DriverForm — create/edit form for driver records.
+ * The backend requires driver_id (it's the primary key), so the create form
+ * includes a driver_id field; it's disabled when editing.
  */
 export default function DriverForm({ initial, onSubmit, onCancel, loading }) {
   const [form, setForm] = useState(EMPTY)
@@ -22,6 +25,7 @@ export default function DriverForm({ initial, onSubmit, onCancel, loading }) {
 
   useEffect(() => {
     setForm(initial ? {
+      driver_id: initial.driver_id || '',
       name: initial.name || '',
       license_number: initial.license_number || '',
       license_category: initial.license_category || 'LMV',
@@ -40,6 +44,7 @@ export default function DriverForm({ initial, onSubmit, onCancel, loading }) {
 
   const validate = () => {
     const e = {}
+    if (!initial && !form.driver_id.trim()) e.driver_id = 'Driver ID is required.'
     if (!form.name.trim()) e.name = 'Name is required.'
     if (!form.license_number.trim()) e.license_number = 'License number is required.'
     if (!form.license_expiry_date) e.license_expiry_date = 'Expiry date is required.'
@@ -60,6 +65,9 @@ export default function DriverForm({ initial, onSubmit, onCancel, loading }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      {!initial && (
+        <Input label="Driver ID" required placeholder="DRV-19" error={errors.driver_id} value={form.driver_id} onChange={set('driver_id')} hint="Unique identifier, e.g. DRV-19" />
+      )}
       <Input label="Full Name" required placeholder="Alex Sharma" error={errors.name} value={form.name} onChange={set('name')} />
       <div className="grid grid-cols-2 gap-4">
         <Input label="License Number" required placeholder="GJ142023617488" error={errors.license_number} value={form.license_number} onChange={set('license_number')} disabled={!!initial} />
