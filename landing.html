@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TransitOps - Fleet Operations Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --brand-400:#818cf8;--brand-500:#6366f1;--brand-600:#4f46e5;--brand-700:#4338ca;
+  --ink-800:#1e293b;--ink-900:#0f172a;--ink-950:#020617;
+  --glow:0 0 0 1px rgba(99,102,241,0.12),0 8px 24px -8px rgba(99,102,241,0.35);
+  --glass-bg:rgba(255,255,255,0.04);
+  --glass-border:1px solid rgba(99,102,241,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--ink-950);color:#e2e8f0;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;overflow-x:hidden;line-height:1.6;
+}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+a{color:inherit;text-decoration:none}
+section{position:relative}
+
+/* ── Layout helpers ── */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.section-pad{padding:120px 0}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--brand-400);margin-bottom:16px}
+.section-title{font-size:44px;font-weight:800;letter-spacing:-0.02em;line-height:1.15;color:#f8fafc;margin-bottom:16px}
+.section-sub{font-size:18px;color:#94a3b8;max-width:640px}
+.text-grad{background:linear-gradient(135deg,#818cf8 0%,#6366f1 50%,#4f46e5 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* ── Reveal on scroll ── */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:all 0.25s ease;font-family:inherit}
+.btn-primary{background:var(--brand-600);color:#fff;box-shadow:var(--glow)}
+.btn-primary:hover{background:var(--brand-500);transform:translateY(-2px);box-shadow:0 0 0 1px rgba(99,102,241,0.3),0 12px 32px -8px rgba(99,102,241,0.5)}
+.btn-ghost{background:transparent;color:#e2e8f0;border:1px solid rgba(99,102,241,0.3)}
+.btn-ghost:hover{border-color:var(--brand-500);background:rgba(99,102,241,0.08);transform:translateY(-2px)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;
+  background:radial-gradient(ellipse 80% 60% at 50% 45%,rgba(99,102,241,0.18) 0%,transparent 70%),var(--ink-950)}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero-content{position:relative;z-index:2;max-width:900px;padding:0 24px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--brand-400);margin-bottom:28px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--brand-400);box-shadow:0 0 8px var(--brand-400)}
+.hero h1{font-size:clamp(36px,6vw,72px);font-weight:800;letter-spacing:-0.03em;line-height:1.08;color:#f8fafc;margin-bottom:24px}
+.hero p.sub{font-size:clamp(16px,2vw,20px);color:#94a3b8;max-width:680px;margin:0 auto 40px}
+.hero-ctas{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:2;color:#475569;font-size:13px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+
+/* ── Stats ticker ── */
+.ticker{background:var(--ink-900);border-top:1px solid rgba(99,102,241,0.15);border-bottom:1px solid rgba(99,102,241,0.15);padding:18px 0;overflow:hidden;white-space:nowrap}
+.ticker-track{display:inline-flex;gap:48px;animation:scroll-x 30s linear infinite;will-change:transform}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker-item{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:15px;color:#cbd5e1}
+.ticker-item .val{color:var(--brand-400);font-weight:600}
+.ticker-item .sep{color:#334155}
+@keyframes scroll-x{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── Features grid ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:56px}
+.feature-card{background:var(--glass-bg);border:var(--glass-border);border-radius:16px;padding:32px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.3s ease,box-shadow 0.3s ease;transform-style:preserve-3d;cursor:default}
+.feature-card:hover{box-shadow:var(--glow);transform:translateY(-6px)}
+.feature-icon{width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--brand-400);transition:transform 0.3s ease}
+.feature-card:hover .feature-icon{transform:rotate(10deg)}
+.feature-card h3{font-size:19px;font-weight:700;color:#f1f5f9;margin-bottom:10px}
+.feature-card p{font-size:14px;color:#94a3b8;line-height:1.6}
+
+/* ── Roles ── */
+.roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:56px}
+.role-card{background:var(--glass-bg);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;transform-style:preserve-3d}
+.role-card:hover{transform:translateY(-6px)}
+.role-avatar{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin-bottom:18px}
+.role-card h3{font-size:17px;font-weight:700;color:#f1f5f9;margin-bottom:6px}
+.role-card .role-scope{font-family:'JetBrains Mono',monospace;font-size:12px;color:#64748b;margin-bottom:12px}
+.role-card p{font-size:13px;color:#94a3b8;line-height:1.55}
+
+/* ── Module showcase ── */
+.modules-section{background:var(--ink-900)}
+.iso-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(60deg,rgba(99,102,241,0.04) 0,rgba(99,102,241,0.04) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(-60deg,rgba(99,102,241,0.04) 0,rgba(99,102,241,0.04) 1px,transparent 1px,transparent 40px);pointer-events:none}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:56px;position:relative}
+.module-pill{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 16px;border-radius:14px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);transition:all 0.3s ease}
+.module-pill:hover{border-color:var(--brand-500);box-shadow:var(--glow);transform:translateY(-4px)}
+.module-pill svg{width:28px;height:28px;color:var(--brand-400);transition:transform 0.3s ease}
+.module-pill:hover svg{transform:scale(1.1)}
+.module-pill span{font-size:14px;font-weight:600;color:#cbd5e1}
+
+/* ── Tech bar ── */
+.tech-bar{background:var(--ink-950);border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05);padding:40px 0}
+.tech-bar .label{text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:24px}
+.tech-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.tech-badge{font-family:'JetBrains Mono',monospace;font-size:13px;color:#94a3b8;padding:8px 18px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);transition:all 0.25s ease}
+.tech-badge:hover{color:var(--brand-400);border-color:rgba(99,102,241,0.3)}
+
+/* ── CTA footer ── */
+.cta-footer{text-align:center;padding:120px 24px;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(99,102,241,0.15) 0%,transparent 70%),var(--ink-950)}
+.cta-footer h2{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-0.02em;color:#f8fafc;margin-bottom:16px}
+.cta-footer p{font-size:17px;color:#94a3b8;margin-bottom:40px}
+.btn-shimmer{position:relative;overflow:hidden;background:var(--brand-600);color:#fff;padding:18px 40px;border-radius:14px;font-size:17px;font-weight:700;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:var(--glow);transition:transform 0.25s ease}
+.btn-shimmer:hover{transform:translateY(-3px)}
+.btn-shimmer::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);transition:left 0.6s ease}
+.btn-shimmer:hover::before{left:100%}
+.cta-edition{margin-top:32px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#475569}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .section-pad{padding:80px 0}
+  .section-title{font-size:32px}
+  .hero-ctas{flex-direction:column;align-items:stretch}
+  .btn,.btn-shimmer{justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}
+  .ticker-track{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ 1. HERO ════════════ -->
+<section class="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> TransitOps · Odoo Hackathon 2026</div>
+    <h1>Rules-Driven Fleet Operations,<br><span class="text-grad">Without the Spreadsheet Chaos.</span></h1>
+    <p class="sub">Dispatch validation, automatic status transitions, maintenance locking, and live KPI analytics — all enforced by a real business-rules engine.</p>
+    <div class="hero-ctas">
+      <a href="/login" class="btn btn-primary">Get Started <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a href="/login" class="btn btn-ghost">View Demo</a>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll to explore</div>
+</section>
+
+<!-- ════════════ 2. LIVE STATS TICKER ════════════ -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="val">16</span> Total Vehicles</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">18</span> Drivers</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">5</span> Active Trips</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">31%</span> Fleet Utilization</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">7</span> Safety Alerts</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">₹85K</span> Monthly Fuel Cost</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">16</span> Total Vehicles</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">18</span> Drivers</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">5</span> Active Trips</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">31%</span> Fleet Utilization</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">7</span> Safety Alerts</span><span class="sep">·</span>
+    <span class="ticker-item"><span class="val">₹85K</span> Monthly Fuel Cost</span><span class="sep">·</span>
+  </div>
+</div>
+
+<!-- ════════════ 3. FEATURES GRID ════════════ -->
+<section class="section-pad">
+  <div class="container">
+    <div class="reveal">
+      <div class="eyebrow">Core Engine</div>
+      <h2 class="section-title">Built on rules, not guesswork</h2>
+      <p class="section-sub">Every dispatch passes through a 13-check validation engine before a single wheel turns. No spreadsheets, no manual cross-referencing, no double-booked trucks.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal" data-tilt>
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>13-Rule Dispatch Engine</h3>
+        <p>Intelligent eligibility checks before every trip dispatch — license validity, vehicle status, cargo limits, and double-assignment prevention, all in one pass.</p>
+      </div>
+      <div class="feature-card reveal" data-tilt>
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></div>
+        <h3>Atomic Status Sync</h3>
+        <p>Vehicle and driver statuses update together, atomically, in a single database transaction. Dispatch a trip and both flip to "On Trip" — or neither does.</p>
+      </div>
+      <div class="feature-card reveal" data-tilt>
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3>Maintenance Locking</h3>
+        <p>Vehicles in maintenance are automatically blocked from dispatch. The engine checks active maintenance records before allowing any trip to go out.</p>
+      </div>
+      <div class="feature-card reveal" data-tilt>
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+        <h3>Live KPI Analytics</h3>
+        <p>ROI, cost breakdown, fleet utilization — all live from the database. No exports, no stale snapshots, just real numbers the moment you load the dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 4. ROLE-BASED ACCESS ════════════ -->
+<section class="section-pad" style="background:var(--ink-900)">
+  <div class="container">
+    <div class="reveal">
+      <div class="eyebrow">RBAC</div>
+      <h2 class="section-title">Built for every team member</h2>
+      <p class="section-sub">Role-based access control means each user sees exactly what they need — and nothing they shouldn't. Four roles, one source of truth.</p>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card reveal" data-tilt style="--accent:#6366f1">
+        <div class="role-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">F</div>
+        <h3>Fleet Manager</h3>
+        <div class="role-scope">fleet_manager</div>
+        <p>Full access: vehicles, drivers, trips, dispatch, maintenance, expenses, and reports.</p>
+      </div>
+      <div class="role-card reveal" data-tilt style="--accent:#3b82f6">
+        <div class="role-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">D</div>
+        <h3>Driver</h3>
+        <div class="role-scope">driver</div>
+        <p>Trips, fuel logs, and expenses — focused on the road, not the back office.</p>
+      </div>
+      <div class="role-card reveal" data-tilt style="--accent:#f59e0b">
+        <div class="role-avatar" style="background:linear-gradient(135deg,#f59e0b,#b45309)">S</div>
+        <h3>Safety Officer</h3>
+        <div class="role-scope">safety_officer</div>
+        <p>Drivers, maintenance oversight, and reports — keeping the fleet compliant and road-safe.</p>
+      </div>
+      <div class="role-card reveal" data-tilt style="--accent:#10b981">
+        <div class="role-avatar" style="background:linear-gradient(135deg,#10b981,#047857)">F</div>
+        <h3>Financial Analyst</h3>
+        <div class="role-scope">financial_analyst</div>
+        <p>Expenses, fuel logs, and reports — the numbers side of fleet operations, live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 5. MODULE SHOWCASE ════════════ -->
+<section class="section-pad modules-section">
+  <div class="iso-grid"></div>
+  <div class="container" style="position:relative">
+    <div class="reveal">
+      <div class="eyebrow">Modules</div>
+      <h2 class="section-title">Everything your fleet needs</h2>
+      <p class="section-sub">Eight integrated modules covering the full operational lifecycle — from dispatch to settlement.</p>
+    </div>
+    <div class="modules-grid">
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Dashboard</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>Vehicles</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="10" r="2"/><path d="M8 16c0-2 2-3 4-3s4 1 4 3"/></svg><span>Drivers</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Trips</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Maintenance</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="15" y2="22"/><line x1="4" y1="9" x2="14" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg><span>Fuel Logs</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg><span>Expenses</span></div>
+      <div class="module-pill reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg><span>Reports</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 6. TECH TRUST BAR ════════════ -->
+<section class="tech-bar">
+  <div class="container">
+    <div class="label">Powered by</div>
+    <div class="tech-badges">
+      <span class="tech-badge">React</span>
+      <span class="tech-badge">Vite</span>
+      <span class="tech-badge">Node.js</span>
+      <span class="tech-badge">Express</span>
+      <span class="tech-badge">MySQL</span>
+      <span class="tech-badge">JWT Auth</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 7. CTA FOOTER ════════════ -->
+<section class="cta-footer">
+  <h2>Ready to take control<br>of your fleet?</h2>
+  <p>Dispatch with confidence. Every trip validated. Every status synced.</p>
+  <a href="/login" class="btn-shimmer">Launch Console <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <div class="cta-edition">Odoo Hackathon 2026 · Virtual Round</div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ════════ THREE.JS HERO SCENE ════════ */
+  var canvas = document.getElementById('hero-canvas');
+  var scene, camera, renderer, truckGroup, sceneGroup;
+  var cards = [], particles;
+  var mouseX = 0, mouseY = 0;
+  var targetRotX = 0, targetRotY = 0;
+
+  function makeCardTexture(label, value){
+    var c = document.createElement('canvas');
+    c.width = 256; c.height = 128;
+    var ctx = c.getContext('2d');
+    // card background
+    ctx.fillStyle = 'rgba(15,23,42,0.85)';
+    roundRect(ctx, 0, 0, 256, 128, 16); ctx.fill();
+    ctx.strokeStyle = 'rgba(99,102,241,0.35)'; ctx.lineWidth = 2;
+    roundRect(ctx, 1, 1, 254, 126, 15); ctx.stroke();
+    // value
+    ctx.fillStyle = '#818cf8';
+    ctx.font = 'bold 44px Inter, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(value, 128, 48);
+    // label
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '500 22px Inter, sans-serif';
+    ctx.fillText(label, 128, 88);
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  function buildTruck(){
+    var g = new THREE.Group();
+    var bodyMat = new THREE.MeshStandardMaterial({color:0x4f46e5,emissive:0x6366f1,emissiveIntensity:0.4,metalness:0.3,roughness:0.4});
+    var cabinMat = new THREE.MeshStandardMaterial({color:0x4338ca,emissive:0x6366f1,emissiveIntensity:0.3,metalness:0.3,roughness:0.4});
+    var wheelMat = new THREE.MeshStandardMaterial({color:0x1e293b,metalness:0.5,roughness:0.6});
+    var glassMat = new THREE.MeshStandardMaterial({color:0x818cf8,emissive:0x6366f1,emissiveIntensity:0.5,transparent:true,opacity:0.6});
+
+    // cargo box
+    var cargo = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2, 2), bodyMat);
+    cargo.position.set(-0.4, 0.5, 0);
+    g.add(cargo);
+    // cabin
+    var cabin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.5, 1.9), cabinMat);
+    cabin.position.set(1.9, 0.2, 0);
+    g.add(cabin);
+    // windshield
+    var glass = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1, 1.7), glassMat);
+    glass.position.set(2.55, 0.4, 0);
+    g.add(glass);
+    // wheels
+    var wheelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.4, 20);
+    var positions = [[-1.2,-0.8,1.1],[-1.2,-0.8,-1.1],[1.4,-0.8,1.1],[1.4,-0.8,-1.1]];
+    for (var i=0; i<positions.length; i++){
+      var w = new THREE.Mesh(wheelGeo, wheelMat);
+      w.rotation.x = Math.PI/2;
+      w.position.set(positions[i][0], positions[i][1], positions[i][2]);
+      g.add(w);
+    }
+    // headlight glow
+    var lightMat = new THREE.MeshBasicMaterial({color:0xa5b4fc});
+    var lh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), lightMat);
+    lh.position.set(2.6, 0.2, 0.7); g.add(lh);
+    var lh2 = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), lightMat);
+    lh2.position.set(2.6, 0.2, -0.7); g.add(lh2);
+
+    return g;
+  }
+
+  function initThree(){
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1, 11);
+
+    renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0x6366f1, 0.5));
+    var key = new THREE.DirectionalLight(0x818cf8, 1.2);
+    key.position.set(5, 8, 6); scene.add(key);
+    var rim = new THREE.DirectionalLight(0x4f46e5, 0.8);
+    rim.position.set(-6, 2, -4); scene.add(rim);
+    var point = new THREE.PointLight(0x6366f1, 1.5, 20);
+    point.position.set(0, 2, 4); scene.add(point);
+
+    sceneGroup = new THREE.Group();
+    scene.add(sceneGroup);
+
+    // Truck
+    truckGroup = buildTruck();
+    truckGroup.scale.set(0.85, 0.85, 0.85);
+    sceneGroup.add(truckGroup);
+
+    // Orbiting KPI cards
+    var cardData = [
+      {label:'Vehicles', value:'16'},
+      {label:'Drivers', value:'18'},
+      {label:'Utilization', value:'31%'},
+      {label:'Alerts', value:'7'}
+    ];
+    for (var i=0; i<cardData.length; i++){
+      var tex = makeCardTexture(cardData[i].label, cardData[i].value);
+      var mat = new THREE.SpriteMaterial({map:tex, transparent:true});
+      var sprite = new THREE.Sprite(mat);
+      sprite.scale.set(2.2, 1.1, 1);
+      sprite.userData.angle = (i / cardData.length) * Math.PI * 2;
+      sprite.userData.radius = 5.5;
+      sprite.userData.speed = 0.003;
+      cards.push(sprite);
+      sceneGroup.add(sprite);
+    }
+
+    // Particle starfield
+    var pCount = 400;
+    var pGeo = new THREE.BufferGeometry();
+    var pPos = new Float32Array(pCount * 3);
+    for (var j=0; j<pCount; j++){
+      pPos[j*3]   = (Math.random()-0.5) * 40;
+      pPos[j*3+1] = (Math.random()-0.5) * 25;
+      pPos[j*3+2] = (Math.random()-0.5) * 30 - 5;
+    }
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    var pMat = new THREE.PointsMaterial({color:0x818cf8, size:0.06, transparent:true, opacity:0.6, blending:THREE.AdditiveBlending});
+    particles = new THREE.Points(pGeo, pMat);
+    scene.add(particles);
+
+    animate();
+  }
+
+  var clock = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    clock += 0.016;
+
+    if (!reduceMotion){
+      // Float bob
+      sceneGroup.position.y = Math.sin(clock * 0.8) * 0.4;
+      // Slow Y rotation
+      truckGroup.rotation.y += 0.005;
+      // Orbit cards
+      for (var i=0; i<cards.length; i++){
+        cards[i].userData.angle += cards[i].userData.speed;
+        var a = cards[i].userData.angle;
+        var r = cards[i].userData.radius;
+        cards[i].position.x = Math.cos(a) * r;
+        cards[i].position.z = Math.sin(a) * r;
+        cards[i].position.y = Math.sin(a * 2) * 0.8;
+      }
+      // Particle drift
+      particles.rotation.y += 0.0003;
+    }
+
+    // Mouse parallax (clamped ±8deg, lerped)
+    targetRotX += (mouseY * 0.14 - targetRotX) * 0.05;
+    targetRotY += (mouseX * 0.14 - targetRotY) * 0.05;
+    sceneGroup.rotation.x = THREE.MathUtils.clamp(targetRotX, -0.14, 0.14);
+    sceneGroup.rotation.y = THREE.MathUtils.clamp(targetRotY, -0.14, 0.14);
+
+    renderer.render(scene, camera);
+  }
+
+  function onResize(){
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  function onMouseMove(e){
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+  }
+
+  if (typeof THREE !== 'undefined'){
+    initThree();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('mousemove', onMouseMove);
+  }
+
+  /* ════════ SCROLL REVEAL ════════ */
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        // Stagger within the same parent
+        var siblings = entry.target.parentElement.querySelectorAll('.reveal');
+        var idx = 0;
+        siblings.forEach(function(s, i){ if (s === entry.target) idx = i; });
+        entry.target.style.transitionDelay = (idx * 100) + 'ms';
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.15, rootMargin:'0px 0px -60px 0px'});
+  revealEls.forEach(function(el){ io.observe(el); });
+
+  /* ════════ 3D TILT ON CARDS ════════ */
+  var tiltEls = document.querySelectorAll('[data-tilt]');
+  tiltEls.forEach(function(el){
+    el.addEventListener('mousemove', function(e){
+      var rect = el.getBoundingClientRect();
+      var px = (e.clientX - rect.left) / rect.width;
+      var py = (e.clientY - rect.top) / rect.height;
+      var rx = (py - 0.5) * -16;
+      var ry = (px - 0.5) * 16;
+      el.style.transform = 'perspective(800px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-6px)';
+    });
+    el.addEventListener('mouseleave', function(){
+      el.style.transform = '';
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -13,5 +13,28 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    // Proxy /api to the Express backend so the frontend and backend share
+    // an origin in dev (no CORS issues). Active in real mode only.
+    proxy: {
+      '/api': {
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        landing: 'landing.html',
+      },
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          charts: ['recharts'],
+          headless: ['@headlessui/react', '@radix-ui/react-tooltip'],
+        },
+      },
+    },
   },
 })

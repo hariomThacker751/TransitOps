@@ -75,7 +75,7 @@ export default function App() {
         <Route
           path="/expenses"
           element={
-            <RoleGuard allowed={['fleet_manager', 'financial_analyst']}>
+            <RoleGuard allowed={['fleet_manager', 'driver', 'financial_analyst']}>
               <Expenses />
             </RoleGuard>
           }

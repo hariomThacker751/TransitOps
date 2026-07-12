@@ -1,4 +1,5 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 
 /**
@@ -7,7 +8,6 @@ import { useAuth } from '@/context/AuthContext'
  */
 export function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
-  const location = useLocation()
 
   if (loading) {
     return (
@@ -21,10 +21,22 @@ export function ProtectedRoute({ children }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    // Logged-out visitors land on the marketing/landing page first.
+    // window.location.replace forces a full navigation to the static
+    // landing.html (a <Navigate> would only change the URL client-side
+    // and fall through to the NotFound catch-all route).
+    return <RedirectToLanding />
   }
 
   return children
+}
+
+/** Imperatively navigate to the static landing page. */
+function RedirectToLanding() {
+  useEffect(() => {
+    window.location.replace('/landing.html')
+  }, [])
+  return null
 }
 
 /**
