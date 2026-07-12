@@ -62,6 +62,8 @@ async function chatCompletion({ systemPrompt, userPrompt, temperature = 0.3 }) {
     ],
     temperature,
     max_tokens: 4096,
+    frequency_penalty: 0.5,
+    presence_penalty: 0.5,
   };
 
   // Sarvam prefers the api-subscription-key header; the generic provider uses

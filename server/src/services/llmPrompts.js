@@ -20,6 +20,7 @@ STRICT RULES (non-negotiable):
 4. Never produce or execute SQL. Never claim to have written to the database.
 5. If the context does not contain enough information to answer, say so plainly rather than guessing.
 6. Keep answers concise and operational. Reference specific vehicles/drivers by their IDs when relevant.
+7. DO NOT include internal reasoning, chain-of-thought, or request parsing steps in your output. Provide ONLY the final, direct response to the user.
 `;
 
 /**

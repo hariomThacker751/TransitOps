@@ -22,12 +22,15 @@ const FULL_LIST = { limit: 10000 }
 
 export const realAuth = {
   async login(creds) {
-    const res = await http.post('/auth/login', creds)
-    // Backend returns { user: {id,name,email,role} } inside data.
-    if (res.success && res.data) {
-      return { ...res, data: res.data.user }
+    try {
+      const res = await http.post('/auth/login', creds)
+      if (res.success && res.data) {
+        return { ...res, data: res.data.user }
+      }
+      return res
+    } catch (err) {
+      return err
     }
-    return res
   },
   me: () => http.get('/auth/me'),
   logout: () => http.post('/auth/logout'),
