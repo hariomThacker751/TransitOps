@@ -2,12 +2,13 @@ import Papa from 'papaparse'
 
 // The six seed CSVs live at the repo root and are the single source of truth.
 // Imported as raw strings (Vite ?raw) so the dataset files are never modified.
-import vehiclesCsv from '../../vehicles.csv?raw'
-import driversCsv from '../../drivers.csv?raw'
-import tripsCsv from '../../trips.csv?raw'
-import maintenanceCsv from '../../maintenance_logs.csv?raw'
-import fuelCsv from '../../fuel_logs.csv?raw'
-import expensesCsv from '../../expenses.csv?raw'
+// Path: src/api/mock/ → ../../../ reaches the project root.
+import vehiclesCsv from '../../../vehicles.csv?raw'
+import driversCsv from '../../../drivers.csv?raw'
+import tripsCsv from '../../../trips.csv?raw'
+import maintenanceCsv from '../../../maintenance_logs.csv?raw'
+import fuelCsv from '../../../fuel_logs.csv?raw'
+import expensesCsv from '../../../expenses.csv?raw'
 
 /** Empty string → null for nullable fields (matches the plan's import rules). */
 const nullable = (v) => (v === '' || v === undefined || v === null ? null : v)
