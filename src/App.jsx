@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthContext'
 
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Landing from './pages/Landing'
 import Vehicles from './pages/Vehicles'
 import Drivers from './pages/Drivers'
 import Trips from './pages/Trips'
@@ -21,8 +22,10 @@ export default function App() {
     <Routes>
       <Route
         path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
       />
+
+      <Route path="/" element={<Landing />} />
 
       <Route
         element={
@@ -31,7 +34,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route
           path="/vehicles"
           element={

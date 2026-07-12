@@ -7,6 +7,11 @@ const PORT = process.env.PORT || 5000;
 // Start cron jobs
 startLicenseCheckCron();
 
+// Suppress console.log in production
+if (process.env.NODE_ENV === 'production') {
+  console.log = function() {};
+}
+
 app.listen(PORT, () => {
   console.log(`\n🚀 TransitOps API Server running on port ${PORT}`);
   console.log(`   Environment : ${process.env.NODE_ENV || 'development'}`);

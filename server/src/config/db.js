@@ -1,6 +1,11 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
+if (process.env.NODE_ENV === 'production' && !process.env.DB_PASSWORD) {
+  console.error('❌ Critical Error: DB_PASSWORD must be set in production environment.');
+  process.exit(1);
+}
+
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'transitops_db',
   process.env.DB_USER || 'root',

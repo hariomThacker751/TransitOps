@@ -10,6 +10,7 @@ const fuelLogRoutes = require('./fuelLogRoutes');
 const expenseRoutes = require('./expenseRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const reportRoutes = require('./reportRoutes');
+const llmRoutes = require('./llmRoutes');
 
 // Health check
 router.get('/health', (req, res) => {
@@ -26,5 +27,6 @@ router.use('/fuel-logs', fuelLogRoutes);
 router.use('/expenses', expenseRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
+router.use('/llm', llmRoutes);
 
 module.exports = router;

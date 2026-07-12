@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Truck, CheckCircle2, Wrench, Route, ClipboardList, IdCard,
-  TrendingUp, AlertTriangle, ShieldAlert, Gauge,
+  TrendingUp, AlertTriangle, ShieldAlert, Gauge, Sparkles,
 } from 'lucide-react'
 import {
   PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -215,19 +215,23 @@ export default function Dashboard() {
       </div>
 
       {/* ── Quick actions ─────────────────────────────────────────── */}
-      {can('trips', 'create') && (
-        <Card>
-          <CardHeader title="Quick Actions" subtitle="Jump to common operations" />
-          <CardBody className="pt-0">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <QuickAction icon={Route} label="Manage Trips" desc="Dispatch & complete" onClick={() => navigate('/trips')} accent="brand" />
-              {can('vehicles', 'view') && <QuickAction icon={Truck} label="Vehicles" desc="Fleet registry" onClick={() => navigate('/vehicles')} accent="blue" />}
-              {can('maintenance', 'view') && <QuickAction icon={Wrench} label="Maintenance" desc="Active & closed" onClick={() => navigate('/maintenance')} accent="amber" />}
-              {can('reports', 'view') && <QuickAction icon={TrendingUp} label="Reports" desc="ROI & costs" onClick={() => navigate('/reports')} accent="emerald" />}
-            </div>
-          </CardBody>
-        </Card>
-      )}
+      <Card>
+        <CardHeader title="Quick Actions" subtitle="Jump to common operations" />
+        <CardBody className="pt-0">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <QuickAction
+              icon={Sparkles}
+              label="Ops Copilot"
+              desc="Ask the AI assistant"
+              onClick={() => window.dispatchEvent(new Event('transitops:open-copilot'))}
+              accent="brand"
+            />
+            {can('trips', 'create') && <QuickAction icon={Route} label="Manage Trips" desc="Dispatch & complete" onClick={() => navigate('/trips')} accent="blue" />}
+            {can('maintenance', 'view') && <QuickAction icon={Wrench} label="Maintenance" desc="Active & closed" onClick={() => navigate('/maintenance')} accent="amber" />}
+            {can('reports', 'view') && <QuickAction icon={TrendingUp} label="Reports" desc="ROI & costs" onClick={() => navigate('/reports')} accent="emerald" />}
+          </div>
+        </CardBody>
+      </Card>
     </div>
   )
 }
