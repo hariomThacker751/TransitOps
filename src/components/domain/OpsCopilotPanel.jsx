@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Send, AlertCircle, User, Bot } from 'lucide-react'
 import Drawer from '@/components/ui/Drawer'
 import Button from '@/components/ui/Button'
@@ -159,18 +160,31 @@ export default function OpsCopilotPanel({ open, onClose }) {
             )}
           </div>
         ) : (
-          messages.map((m, i) => (
-            <MessageBubble key={i} message={m} />
-          ))
+          <AnimatePresence>
+            {messages.map((m, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <MessageBubble message={m} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
 
         {loading && (
-          <div className="flex items-start gap-2.5">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-2.5"
+          >
             <Avatar role="assistant" />
             <div className="rounded-2xl rounded-tl-sm bg-ink-50 px-4 py-3">
               <Loader label="Thinking…" />
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </Drawer>

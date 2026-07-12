@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, AlertCircle } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
@@ -131,11 +132,30 @@ export default function AnomalyExplainerModal({ open, onClose, vehicleReg, metri
               AI Explanation
             </p>
             <div className="rounded-xl bg-brand-50/60 px-4 py-3 text-sm leading-relaxed text-ink-800 ring-1 ring-brand-600/10">
+            <AnimatePresence mode="wait">
               {answer ? (
-                <p className="whitespace-pre-wrap">{answer}</p>
+                <motion.p
+                  key="answer"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="whitespace-pre-wrap"
+                >
+                  {answer}
+                </motion.p>
               ) : (
-                <p className="text-ink-400">No explanation was returned.</p>
+                <motion.p
+                  key="fallback"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-ink-400"
+                >
+                  No explanation was returned.
+                </motion.p>
               )}
+            </AnimatePresence>
             </div>
             <p className="mt-2 text-[11px] text-ink-400">
               Advisory only — the explanation is grounded in the computed summary and cannot change any records.
