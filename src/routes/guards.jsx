@@ -34,7 +34,7 @@ export function ProtectedRoute({ children }) {
 export function RoleGuard({ allowed, children, fallback = null }) {
   const { role } = useAuth()
   if (allowed && !allowed.includes(role)) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/dashboard" replace />
   }
   return children
 }

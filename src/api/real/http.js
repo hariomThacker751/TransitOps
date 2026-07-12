@@ -7,7 +7,7 @@ import axios from 'axios'
  */
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
-const http = axios.create({ baseURL, timeout: 15000, withCredentials: true })
+const http = axios.create({ baseURL, timeout: 60000, withCredentials: true })
 
 // Normalize errors into the plan's { success, message } shape.
 // Blob responses (CSV export) bypass this — they're handled separately.
