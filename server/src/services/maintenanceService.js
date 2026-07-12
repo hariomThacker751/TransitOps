@@ -14,6 +14,14 @@ const createMaintenance = async ({ vehicle_reg, maintenance_type, cost, start_da
     throw new ApiError(404, `Vehicle '${vehicle_reg}' does not exist.`);
   }
 
+  // Prevent maintenance on dispatched vehicles
+  if (vehicle.status === 'On Trip') {
+    throw new ApiError(
+      400,
+      `Vehicle '${vehicle_reg}' is currently on a dispatched trip. Complete or cancel the trip before scheduling maintenance.`
+    );
+  }
+
   // Check for already-active maintenance on this vehicle
   const existingActive = await MaintenanceLog.findOne({
     where: { vehicle_reg, status: 'Active' },

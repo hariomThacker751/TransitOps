@@ -10,6 +10,10 @@ const Expense = sequelize.define('Expense', {
     type: DataTypes.STRING(20),
     allowNull: true,
   },
+  trip_id: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+  },
   expense_type: {
     type: DataTypes.STRING(100),
     allowNull: true,
@@ -27,6 +31,7 @@ const Expense = sequelize.define('Expense', {
   timestamps: false,
   indexes: [
     { fields: ['vehicle_reg'] },
+    { fields: ['trip_id'] },
     { fields: ['date'] },
     { fields: ['expense_type'] },
   ],

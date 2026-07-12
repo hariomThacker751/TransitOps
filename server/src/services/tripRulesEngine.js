@@ -24,9 +24,9 @@ const ApiError = require('../utils/ApiError');
  * 11. driver license_expiry_date >= today  ← CRITICAL: seed data has trap case
  * 12. cargo_weight_kg <= vehicle.max_load_capacity_kg
  */
-const validateDispatch = async (tripId) => {
+const validateDispatch = async (tripId, t = null) => {
   // Rule 1: trip exists
-  const trip = await Trip.findByPk(tripId);
+  const trip = await Trip.findByPk(tripId, { transaction: t });
   if (!trip) {
     throw new ApiError(404, `Trip '${tripId}' does not exist.`);
   }
@@ -40,13 +40,13 @@ const validateDispatch = async (tripId) => {
   }
 
   // Rule 3: vehicle exists
-  const vehicle = await Vehicle.findByPk(trip.vehicle_reg);
+  const vehicle = await Vehicle.findByPk(trip.vehicle_reg, { transaction: t });
   if (!vehicle) {
     throw new ApiError(404, `Vehicle '${trip.vehicle_reg}' does not exist.`);
   }
 
   // Rule 4: driver exists
-  const driver = await Driver.findByPk(trip.driver_id);
+  const driver = await Driver.findByPk(trip.driver_id, { transaction: t });
   if (!driver) {
     throw new ApiError(404, `Driver '${trip.driver_id}' does not exist.`);
   }
@@ -65,6 +65,7 @@ const validateDispatch = async (tripId) => {
       vehicle_reg: trip.vehicle_reg,
       status: 'Dispatched',
     },
+    transaction: t,
   });
   if (vehicleActiveTrip) {
     throw new ApiError(
@@ -79,6 +80,7 @@ const validateDispatch = async (tripId) => {
       vehicle_reg: trip.vehicle_reg,
       status: 'Active',
     },
+    transaction: t,
   });
   if (activeMaintenance) {
     throw new ApiError(
@@ -109,6 +111,7 @@ const validateDispatch = async (tripId) => {
       driver_id: trip.driver_id,
       status: 'Dispatched',
     },
+    transaction: t,
   });
   if (driverActiveTrip) {
     throw new ApiError(

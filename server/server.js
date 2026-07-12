@@ -1,7 +1,11 @@
 require('dotenv').config();
 const app = require('./src/app');
+const startLicenseCheckCron = require('./src/cron/licenseCheck');
 
 const PORT = process.env.PORT || 5000;
+
+// Start cron jobs
+startLicenseCheckCron();
 
 app.listen(PORT, () => {
   console.log(`\n🚀 TransitOps API Server running on port ${PORT}`);

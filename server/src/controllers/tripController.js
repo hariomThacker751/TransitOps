@@ -3,6 +3,7 @@ const { sequelize } = require('../config/db');
 const Trip = require('../models/Trip');
 const Vehicle = require('../models/Vehicle');
 const Driver = require('../models/Driver');
+const FuelLog = require('../models/FuelLog');
 const { validateDispatch } = require('../services/tripRulesEngine');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
@@ -149,14 +150,14 @@ const createTrip = asyncHandler(async (req, res) => {
 const dispatchTrip = asyncHandler(async (req, res) => {
   const { trip_id } = req.params;
 
-  // Run the rules engine - throws ApiError on any failure
-  const { trip, vehicle, driver } = await validateDispatch(trip_id);
-
-  const today = new Date().toISOString().split('T')[0];
-
-  // Atomic transaction: all three updates or none
+  // Atomic transaction: all checks and updates happen together
   const t = await sequelize.transaction();
   try {
+    // Run the rules engine - throws ApiError on any failure
+    const { trip, vehicle, driver } = await validateDispatch(trip_id, t);
+
+    const today = new Date().toISOString().split('T')[0];
+
     await Trip.update(
       { status: 'Dispatched', dispatched_date: today },
       { where: { trip_id }, transaction: t }
@@ -235,6 +236,29 @@ const completeTrip = asyncHandler(async (req, res) => {
         { status: 'Available' },
         { where: { driver_id: trip.driver_id }, transaction: t }
       );
+    }
+
+    if (fuel_consumed_liters && parseFloat(fuel_consumed_liters) > 0) {
+      const latestLog = await FuelLog.findOne({
+        where: { fuel_log_id: { [Op.like]: 'FL-%' } },
+        order: [['fuel_log_id', 'DESC']],
+        transaction: t,
+      });
+
+      let num = 1;
+      if (latestLog) {
+        num = parseInt(latestLog.fuel_log_id.split('-')[1]) + 1;
+      }
+      const fuel_log_id = `FL-${String(num).padStart(4, '0')}`;
+
+      await FuelLog.create({
+        fuel_log_id,
+        vehicle_reg: trip.vehicle_reg,
+        trip_id,
+        liters: fuel_consumed_liters,
+        cost: null,
+        date: today,
+      }, { transaction: t });
     }
 
     await t.commit();
