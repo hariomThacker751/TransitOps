@@ -160,4 +160,4 @@ The six CSV files at the repo root are the imported unchanged as seed data:
 
 ---
 
-*Built for Odoo Hackathon 2026 — Virtual Round.*
+*Built for Odoo Hackathon 2026 — Virtual Round.* 
