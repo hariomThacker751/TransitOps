@@ -1,0 +1,17 @@
+registration_number,vehicle_name_model,type,max_load_capacity_kg,odometer_km,acquisition_cost,status,region
+VAN-05,Force Traveller,Van,500,63513,985264,Available,North
+VEH-02,Ashok Leyland U-3520,Trailer,14200,12811,792986,Retired,South
+VEH-03,Ashok Leyland Dost,Mini-Truck,1150,57124,3403203,In Shop,Central
+VEH-04,Tata Yodha,Pickup,1350,6703,3582668,On Trip,South
+VEH-05,Mahindra Bolero Pickup,Pickup,1500,93236,828700,Available,North
+VEH-06,Tata Yodha,Pickup,1150,163263,1509480,Available,North
+VEH-07,Tata Yodha,Pickup,1150,25656,2715426,Retired,East
+VEH-08,Ashok Leyland U-3520,Trailer,21250,17012,3173539,On Trip,South
+VEH-09,Tata 1109,Truck,3500,104647,1565905,In Shop,West
+VEH-10,Tata 1109,Truck,4000,74986,3343647,Available,North
+VEH-11,Ashok Leyland U-3520,Trailer,16350,47834,2338859,On Trip,West
+VEH-12,BharatBenz 1617,Truck,8900,62570,3271480,On Trip,East
+VEH-13,Mahindra Supro,Van,550,110162,1522986,In Shop,North
+VEH-14,Ashok Leyland Dost,Mini-Truck,1450,87490,1291820,Retired,West
+VEH-15,Mahindra Bolero Pickup,Pickup,1700,69651,3524710,Available,Central
+VEH-16,Tata Signa 4018.T,Trailer,18700,157969,2075207,On Trip,East

@@ -1,0 +1,22 @@
+maintenance_id,vehicle_reg,maintenance_type,cost,start_date,end_date,status
+MNT-001,VEH-10,AC Service,27997,2026-01-17,2026-01-23,Closed
+MNT-002,VEH-09,AC Service,32130,2026-01-03,2026-01-05,Closed
+MNT-003,VEH-08,General Inspection,36504,2025-11-14,2025-11-16,Closed
+MNT-004,VEH-12,General Inspection,38487,2026-07-01,2026-07-05,Closed
+MNT-005,VEH-05,Oil Change,43623,2026-01-19,2026-01-20,Closed
+MNT-006,VEH-04,AC Service,31757,2026-03-20,2026-03-22,Closed
+MNT-007,VEH-02,Brake Service,26344,2026-05-22,2026-05-23,Closed
+MNT-008,VEH-16,Engine Overhaul,22920,2026-04-15,2026-04-17,Closed
+MNT-009,VAN-05,Brake Service,29127,2026-04-12,2026-04-16,Closed
+MNT-010,VEH-06,Engine Overhaul,2770,2026-05-04,2026-05-05,Closed
+MNT-011,VEH-13,Oil Change,24435,2025-12-28,2026-01-02,Closed
+MNT-012,VEH-05,Oil Change,44213,2026-05-11,2026-05-17,Closed
+MNT-013,VEH-03,Tire Replacement,14565,2026-06-27,2026-06-28,Closed
+MNT-014,VEH-13,General Inspection,11486,2025-12-05,2025-12-06,Closed
+MNT-015,VEH-13,Engine Overhaul,8996,2026-05-07,2026-05-09,Closed
+MNT-016,VEH-16,Engine Overhaul,18293,2026-02-13,2026-02-15,Closed
+MNT-017,VEH-05,Tire Replacement,41207,2025-12-23,2025-12-26,Closed
+MNT-018,VEH-10,Battery Replacement,9006,2026-02-02,2026-02-08,Closed
+MNT-019,VEH-06,Brake Service,8584,2025-12-20,2025-12-22,Closed
+MNT-020,VEH-04,Brake Service,39235,2026-02-09,2026-02-10,Closed
+MNT-021,VEH-03,Engine Overhaul,38500,2026-07-09,,Active
