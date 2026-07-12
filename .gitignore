@@ -28,3 +28,7 @@ dist-ssr
 .env.*.local
 .env
 .zcode
+
+# Backend
+server/node_modules
+server/.env

@@ -7,7 +7,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server:install": "cd server && npm install",
+    "server:dev": "cd server && npm run dev",
+    "server:setup": "cd server && npm run setup:db && npm run seed:all",
+    "server:setup:db": "cd server && npm run setup:db",
+    "server:seed": "cd server && npm run seed:all"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.19",

@@ -23,10 +23,10 @@ npm run dev          # starts on http://localhost:5173
 
 | Role | Email | Password |
 |---|---|---|
-| Fleet Manager | `fleet@transitops.com` | `transitops` |
-| Driver | `driver@transitops.com` | `transitops` |
-| Safety Officer | `safety@transitops.com` | `transitops` |
-| Financial Analyst | `finance@transitops.com` | `transitops` |
+| Fleet Manager | `fleet@transitops.com` | `Fleet@123` |
+| Driver | `driver@transitops.com` | `Driver@123` |
+| Safety Officer | `safety@transitops.com` | `Safety@123` |
+| Financial Analyst | `finance@transitops.com` | `Finance@123` |
 
 Or use the **one-click demo buttons** on the login screen. In mock mode, the topbar has a **role switcher** to instantly view any role's dashboard without re-logging in.
 
@@ -35,15 +35,24 @@ Or use the **one-click demo buttons** on the login screen. In mock mode, the top
 ```
 TransitOps/
 ├── *.csv                      # Seed datasets (single source of truth, imported via Vite ?raw)
-└── src/
+├── server/                    # Express + MySQL + Sequelize backend
+│   ├── server.js              # Entry point (port 5000)
+│   ├── src/
+│   │   ├── app.js             # Express app (helmet, CORS, routes at /api)
+│   │   ├── config/db.js       # Sequelize MySQL connection
+│   │   ├── controllers/       # Auth, Vehicle, Driver, Trip, Maintenance, Fuel, Expense, Dashboard
+│   │   ├── routes/            # All API routes
+│   │   ├── middlewares/       # authMiddleware, roleMiddleware, errorHandler, validateRequest
+│   │   ├── models/            # Sequelize models (7 tables)
+│   │   ├── services/          # tripRulesEngine, maintenanceService, reportService
+│   │   ├── utils/             # ApiResponse, ApiError, asyncHandler
+│   │   └── seeds/             # setupDb, importCsv, seedUsers + data/*.csv
+│   └── package.json
+└── src/                       # React frontend
     ├── api/
     │   ├── index.js           # Unified facade — routes to mock or real based on VITE_USE_MOCK
-    │   ├── mock/              # Client-side rules engine + state machine
-    │   │   ├── seed.js        # Parses the 6 CSVs into normalized records
-    │   │   ├── db.js          # In-memory store with localStorage persistence
-    │   │   ├── rules.js       # The 13-rule dispatch validation engine
-    │   │   └── transitions.js # Atomic state transitions (dispatch/complete/cancel/maintenance)
-    │   └── real/              # Axios calls to the Express API (plan's exact endpoints)
+    │   ├── mock/              # Client-side rules engine + state machine (standalone demo mode)
+    │   └── real/              # Axios calls to the Express API (exact backend endpoints)
     ├── context/AuthContext.jsx
     ├── routes/guards.jsx      # ProtectedRoute + RoleGuard
     ├── layouts/               # MainLayout, Sidebar, Topbar
@@ -51,21 +60,41 @@ TransitOps/
     │   ├── ui/                # Design system primitives
     │   └── domain/            # Forms + dispatch panel
     ├── pages/                 # 9 pages
-    └── utils/                 # cn, format, csv, statusConfig, constants
+    └── utils/                 # cn, format, csv, statusConfig, constants, dispatchRules
 ```
 
-### Swappable Data Layer
+### Two Running Modes
 
-The app runs in **mock mode** by default (`VITE_USE_MOCK=true`). All business logic — the 13 dispatch rules, status transitions, maintenance locking, and KPI computation — is faithfully simulated client-side. State persists to `localStorage` and can be reset to seed via the topbar "Reset data" button.
+**1. Mock Mode (default — `VITE_USE_MOCK=true`)**
+No backend required. All business logic — the 13 dispatch rules, status transitions, maintenance locking, and KPI computation — is faithfully simulated client-side. State persists to `localStorage` and can be reset to seed via the topbar "Reset data" button.
 
-To connect the real backend:
-
-```env
-VITE_USE_MOCK=false
-VITE_API_BASE_URL=http://localhost:4000
+```bash
+npm install
+npm run dev    # http://localhost:5173 — works standalone
 ```
 
-No component changes needed — the `src/api/` facade routes every call to the corresponding REST endpoint.
+**2. Real Mode (`VITE_USE_MOCK=false`) — Full Stack**
+Connects to the Express + MySQL backend. The Vite dev proxy forwards `/api` to `http://localhost:5000`.
+
+```bash
+# 1. Set up the database + seed data (requires MySQL running)
+cd server
+cp .env.example .env          # edit DB credentials + JWT_SECRET
+npm install
+npm run setup:db              # creates the MySQL database
+npm run seed:all              # creates tables + imports CSVs + seeds users
+
+# 2. Start the backend
+npm run dev                   # http://localhost:5000/api
+
+# 3. In a separate terminal, start the frontend in real mode
+cd ..
+echo "VITE_USE_MOCK=false" > .env
+echo "VITE_BACKEND_URL=http://localhost:5000" >> .env
+npm run dev                   # http://localhost:5173 — talks to backend
+```
+
+No component changes needed — the `src/api/` facade routes every call to the corresponding REST endpoint. A normalization layer in `api/index.js` maps backend snake_case analytics fields to the shapes the UI components expect.
 
 ## 🔧 Business Rules
 
