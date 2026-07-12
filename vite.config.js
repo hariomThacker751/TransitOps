@@ -14,4 +14,15 @@ export default defineConfig({
     port: 5173,
     open: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          charts: ['recharts'],
+          headless: ['@headlessui/react', '@radix-ui/react-tooltip'],
+        },
+      },
+    },
+  },
 })
